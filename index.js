@@ -14,18 +14,6 @@ var _str = require('underscore.string');
 var _ = require('lodash');
 
 
-// var options = {
-//   preset: '',
-//   structure: '',
-//   replacements: [
-//     {
-//       pattern: ':project',
-//       replacement: '<%= pkg.name %>'
-//     }
-//   ]
-// };
-// var context = {};
-
 module.exports = function(structure, context, options) {
   var args = arguments;
 
