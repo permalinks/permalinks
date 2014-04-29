@@ -8,7 +8,7 @@
 * [Install](#install)
 * [Usage](#usage)
 * [Docs](#docs)
-  * [Patterns](#patterns)
+  * [How it works](#how-it-works)
   * [Special Patterns](#special-patterns)
   * [Custom replacement patterns](#custom-replacement-patterns)
   * [Date patterns](#date-patterns)
@@ -47,25 +47,25 @@ permalinks('people/:last/:first', context);
 
 ## Docs
 
-### Patterns
-#### Permalink structure
-
-> Replacement patterns for dynamically constructing permalinks, as well as the corresponding directory structures.
-
-Given this config:
+### How it works
+Pass a **structure** and a **context**:
 
 ```js
-permalinks(':year/:month/:day/:basename:ext', someContext)
-// the generated directory structure and resulting path would look something like:
-//=> '2014/01/01/an-inspiring-post.html'
+var structure = ':a/:b/:c';
+var context = {
+  a: 'foo',
+  b: 'bar',
+  c: 'baz'
+};
+permalinks(structure, context)
+//=> foo/bar/baz
 ```
 
-#### How replacement patterns work
-
-Replacement patterns are used to describe how a string should be parsed. For example, if you were to parse filepaths using the node.js path module, and you passed an object with the parsed values as context, e.g
+A more dynamic example would be parsing filepaths using the node.js path module, passing an object with the parsed values as context:
 
 ```js
-var filepath = 'foo/bar/baz/interesting-post.md';
+// a "source" filepath
+var src = 'src/content/interesting-post.md';
 var context = {
   ext: path.extname(filepath),
   basename: path.basename(filepath, path.extname(filepath)),
@@ -73,15 +73,10 @@ var context = {
 };
 var structure = 'blog/posts/:YYYY/:MM/:basename.html';
 var url = permalinks(structure, context);
+
+// the resulting ("destination") filepath
+// => blog/posts/2014/05/interesting-post.html
 ```
-
-Given the above:
-
-* `:YYYY`: would result in `2014`
-* `:MM`: would result in `05`
-* `:basename`: would result in `interesting-post`
-
-Thus, the `url` variable would return: `blog/posts/2014/05/interesting-post.html`.
 
 ### Special Patterns
 > A few special replacement patterns were created for this lib.
