@@ -1,6 +1,7 @@
 > A few special replacement patterns were created for this lib.
 
 ### `:num`
+
 Automatically adds sequential, "padded" numbers, using the provided `length` to determine the amount of padding.
 
 For example, given you have `permalinks({structure: ':num-:basename', context: context, length: foo})`
@@ -17,8 +18,11 @@ Example:
 * `:000` will result in three-digit numbers
 * `:00000000` will result in eight-digit numbers, and so on...
 
-### `:random(Pattern, Number)`
-Adds randomized characters based on the pattern provided in the parentheses. The first parameter defines the pattern you wish to use, and an optional second parameter defines the number of characters to generate.
+
+
+### `:random( pattern, number )`
+
+Adds randomized characters based on the pattern provided in the parentheses. `pattern` defines the pattern you wish to use, and `number` is an optional parameter to define the number of characters to generate.
 
 For example, `:random(A, 4)` (whitespace insenstive) would result in randomized 4-digit uppercase letters, like, `ZAKH`, `UJSL`... and so on.
 

@@ -29,64 +29,49 @@ module.exports = function(structure, context, options) {
 
   options = options || {};
 
-  // strings middleware normalize to just return the generic
-  // key/value object
+  // strings middleware, normalizes patterns to return a generic key/value object
   var normalize = function (patterns) {
     return function () {
-      return _.map(patterns, function (pattern) {
-        return new strings.Pattern(pattern.pattern, pattern.replacement);
+      return _.map(patterns, function (config) {
+        return new strings.Pattern(config.pattern, config.replacement);
       });
     };
   };
 
-
-  // this is the length of the array of files passed
-  // var len = foo.length;
+  // Allow user-defined length to be provided (for array of files)
   var len = options.length || 3;
   var i = options.index || 0;
 
-  // Best guesses at some useful patterns
+
   var specialPatterns = {
-    'num':      new strings.Pattern(/:\bnum\b/, digits.pad(i, {auto: len})),
-    'digits':   new strings.Pattern(/:(0)+/, function (match) {
-        var matchLen = String(match).length - 1;
-        return digits.pad(i, {digits: matchLen});
-      }),
-    'random':   new strings.Pattern(/:random\(([^)]+)\)/, function (a, b) {
-        var len, chars;
-        if(b.match(/,/)) {
-          len = parseInt(b.split(',')[1], 10);
-          chars = b.split(',')[0];
-          return randomatic(chars, len);
-        } else {
-          var len = b.length;
-          return randomatic(b, len);
-        }
-      })
+    num:    new strings.Pattern(/:\bnum\b/, digits.pad(i, {auto: len})),
+    digits: new strings.Pattern(/:(0)+/, function (match) {
+      var matchLen = String(match).length - 1;
+      return digits.pad(i, {digits: matchLen});
+    }),
+    random: new strings.Pattern(/:random\(([^)]+)\)/, function (a, b) {
+      var len, chars;
+      if(b.match(/,/)) {
+        len = parseInt(b.split(',')[1], 10);
+        chars = b.split(',')[0];
+        return randomatic(chars, len);
+      } else {
+        var len = b.length;
+        return randomatic(b, len);
+      }
+    })
   };
 
   // register the replacements as middleware
   strings
     .use(specialPatterns) // specialPatterns
-
-    // expose context data to Strings
-    .use(context)
-
-    // use the context.date for dates
-    .use(strings.dates(context.date, _.pick(options, 'lang'))) // datePatterns
-
-    // wrap any additional replacement patterns
-    .use(normalize(options.replacements || []))
-    ;
+    .use(context)         // expose context data to Strings
+    .use(strings.dates(context.date, _.pick(options, 'lang'))) // date patterns
+    .use(normalize(options.replacements || [])); // wrap any additional replacement patterns
 
 
-
-  /**
-   * PRESETS
-   * Pre-formatted permalink structures. If a preset is defined, append
-   * it to the user-defined structure.
-   */
-
+  // Presets: pre-formatted permalink structures. If a preset
+  // is defined, append it to the user-defined structure.
   if(options.preset && String(options.preset).length !== 0) {
 
     // The preset

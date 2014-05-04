@@ -1,4 +1,3 @@
-
 ## dateFormats
 Type: `Array`
 

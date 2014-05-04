@@ -15,7 +15,7 @@ var url = fs.readdirSync('./').map(function(filepath) {
 
 results in something like:
 
-```
+```js
 ['my-node-js-post/index.html', ...]
 ```
 
@@ -68,25 +68,25 @@ You don't have to use slashes (`/`) only in your permalinks, you can use `-` or 
 
 Keep in mind that the date is formatted the way you want it, you don't need to follow these examples. Also, some of these variables will only work if you add that property to your pages, and setup the replacement patterns.
 
-```bash
-:YYYY/:MM/:DD/news/:id/index:ext
+```js
+':YYYY/:MM/:DD/news/:id/index:ext'
 //=> dest + '/2014/01/01/news/001/index.html'
 
-:YYYY/:MM/:DD/:mm/:ss/news/:id/index:ext
+':YYYY/:MM/:DD/:mm/:ss/news/:id/index:ext'
 //=> dest + '/2014/01/01/40/16/news/001/index.html'
 
-:year/:month/:day/:basename:ext
+':year/:month/:day/:basename:ext'
 //=> dest + '/2014/01/01/my-post.html'
 
-blog/:year-:month-:day/:basename:ext
+'blog/:year-:month-:day/:basename:ext'
 //=> dest + 'blog/2014-01-01/my-post.html'
 
-:date/:basename:ext
+':date/:basename:ext'
 //=> dest + '2014-01-01/my-post.html'
 
-:year/:month/:day/:category/index.html
+':year/:month/:day/:category/index.html'
 //=> dest + '/2014/01/01/javascript/index.html'
 
-:year/:month/:day/:slug/index.html
+':year/:month/:day/:slug/index.html'
 //=> dest + '/2014/01/01/business-finance/index.html'
 ```

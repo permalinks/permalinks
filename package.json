@@ -1,7 +1,7 @@
 {
   "name": "permalinks",
-  "description": "Add permalinks functionality to any node.js project. Can be used in static site generators, build systems, web applications or anywhere you need to replace properties in strings.",
-  "version": "0.2.0",
+  "description": "Adds permalink or URL routing/URL rewriting logic to any node.js project. Can be used in static site generators, build systems, web applications or anywhere you need to do path transformation or prop-string replacements.",
+  "version": "0.2.1",
   "homepage": "https://github.com/jonschlinkert/permalinks",
   "author": {
     "name": "Jon Schlinkert",
@@ -21,13 +21,23 @@
     }
   ],
   "keywords": [
-    "docs",
-    "documentation",
-    "generate",
-    "generator",
-    "markdown",
-    "templates",
-    "verb"
+    "blog entry",
+    "blog post",
+    "filepath",
+    "link",
+    "path",
+    "permalinks",
+    "permanent link",
+    "rewrite",
+    "rewriting",
+    "route",
+    "routes",
+    "routing",
+    "transformation",
+    "uri",
+    "URL rewriting",
+    "url",
+    "url-routing"
   ],
   "main": "index.js",
   "engines": {
