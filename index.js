@@ -43,7 +43,6 @@ module.exports = function Permalinks(structure, context, options) {
 
 
   permalinks.parser('custom', options.replacements);
-
   permalinks.parser('path', [
     {
       pattern: /:basename/,
@@ -58,9 +57,15 @@ module.exports = function Permalinks(structure, context, options) {
       }
     },
     {
-      pattern: /:extname|:ext/,
+      pattern: /\b:extname\b/,
       replacement: function(pattern) {
-        return this.extname || this.ext;
+        return this.extname;
+      }
+    },
+    {
+      pattern: /\b:ext\b/,
+      replacement: function(pattern) {
+        return this.ext;
       }
     }
   ]);

@@ -1,7 +1,7 @@
 {
   "name": "permalinks",
   "description": "Adds permalink or URL routing/URL rewriting logic to any node.js project. Can be used in static site generators, build systems, web applications or anywhere you need to do path transformation or prop-string replacements.",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "homepage": "https://github.com/jonschlinkert/permalinks",
   "author": {
     "name": "Jon Schlinkert",
