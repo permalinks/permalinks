@@ -1,20 +1,26 @@
-/**
-  * permalinks <https://github.com/assemble/permalinks>
-  *
-  * Copyright (c) 2014, Jon Schlinkert, Brian Woodward, contributors.
-  * Licensed under the MIT License
-  *
-  */
+/*!
+ * permalinks <https://github.com/assemble/permalinks>
+ *
+ * Copyright (c) 2014, Jon Schlinkert, Brian Woodward, contributors.
+ * Licensed under the MIT License
+ *
+ */
 
 var path = require('path');
-var strings = require('strings');
+var Strings = require('strings');
 var digits = require('digits');
 var randomatic = require('randomatic');
 var _str = require('underscore.string');
 var _ = require('lodash');
 
 
-module.exports = function(structure, context, options) {
+var join = function() {
+  var filepath = path.join.apply(path, arguments);
+  return filepath.replace(/\\/g, '/');
+};
+
+
+module.exports = function Permalinks(structure, context, options) {
   var args = arguments;
 
   if (_.isObject(structure) && args.length === 2) {
@@ -26,30 +32,43 @@ module.exports = function(structure, context, options) {
     context = options.context || {};
     structure = options.structure || '';
   }
-
   options = options || {};
 
-  // strings middleware, normalizes patterns to return a generic key/value object
-  var normalize = function (patterns) {
-    return function () {
-      return _.map(patterns, function (config) {
-        return new strings.Pattern(config.pattern, config.replacement);
-      });
-    };
-  };
+  var permalinks = new Strings(context);
 
   // Allow user-defined length to be provided (for array of files)
-  var len = options.length || 3;
+  var l = options.length || 3;
   var i = options.index || 0;
 
 
-  var specialPatterns = {
-    num:    new strings.Pattern(/:\bnum\b/, digits.pad(i, {auto: len})),
-    digits: new strings.Pattern(/:(0)+/, function (match) {
-      var matchLen = String(match).length - 1;
-      return digits.pad(i, {digits: matchLen});
-    }),
-    random: new strings.Pattern(/:random\(([^)]+)\)/, function (a, b) {
+
+  permalinks.parser('custom', options.replacements);
+
+  permalinks.parser('path', [
+    {
+      pattern: /:basename/,
+      replacement: function() {
+        return this.basename;
+      }
+    },
+    {
+      pattern: /:dirname/,
+      replacement: function() {
+        return this.dirname;
+      }
+    },
+    {
+      pattern: /:extname|:ext/,
+      replacement: function(pattern) {
+        return this.extname || this.ext;
+      }
+    }
+  ]);
+
+  permalinks.parser('date',   require('strings-parser-date')());
+  permalinks.parser('random', {
+    pattern: /:random\(([^)]+)\)/,
+    replacement: function (a, b, c) {
       var len, chars;
       if(b.match(/,/)) {
         len = parseInt(b.split(',')[1], 10);
@@ -59,34 +78,46 @@ module.exports = function(structure, context, options) {
         var len = b.length;
         return randomatic(b, len);
       }
-    })
-  };
+    }
+  });
 
-  // register the replacements as middleware
-  strings
-    .use(specialPatterns) // specialPatterns
-    .use(context)         // expose context data to Strings
-    .use(strings.dates(context.date, _.pick(options, 'lang'))) // date patterns
-    .use(normalize(options.replacements || [])); // wrap any additional replacement patterns
+  permalinks.parser('digits', {
+    pattern: /:(0)+/,
+    replacement: function (match) {
+      var matchLen = String(match).length - 1;
+      return digits.pad(i, {digits: matchLen});
+    }
+  });
+
+  permalinks.parser('num', {
+    pattern: /:\bnum\b/,
+    replacement: digits.pad(i, {auto: l})
+  });
+
+  permalinks.parser('prop', {
+    pattern: /:(\w+)/g,
+    replacement: function(match, prop) {
+      return this[prop] || prop;
+    }
+  });
 
 
-  // Presets: pre-formatted permalink structures. If a preset
-  // is defined, append it to the user-defined structure.
+
+  // Presets: pre-formatted permalink propstrings. If a preset is specified
+  // in the options, append it to the user-defined propstring.
+  permalinks.propstring('numbered',  join((structure || ''), ':num-:basename:ext'));
+  permalinks.propstring('pretty',    join((structure || ''), ':basename/index:ext'));
+  permalinks.propstring('dayname',   join((structure || ''), ':YYYY/:MM/:DD/:basename/index:ext'));
+  permalinks.propstring('monthname', join((structure || ''), ':YYYY/:MM/:basename/index:ext'));
+
   if(options.preset && String(options.preset).length !== 0) {
-
-    // The preset
-    var presets = {
-      numbered:  path.join((structure || ''), ':num-:basename:ext'),
-      pretty:    path.join((structure || ''), ':basename/index:ext'),
-      dayname:   path.join((structure || ''), ':YYYY/:MM/:DD/:basename/index:ext'),
-      monthname: path.join((structure || ''), ':YYYY/:MM/:basename/index:ext')
-    };
-    // Presets are joined to structures, so if a preset is specified
-    // use the preset the new structure.
-    structure = String(_.values(_.pick(presets, options.preset)));
+    // Presets are joined to propstrings, so if a preset is
+    // specified use the preset the new propstring.
+    structure = permalinks.propstring(options.preset);
   }
 
+  var parsers = Object.keys(permalinks._parsers);
 
-  var permalink = strings.run(structure).replace(/\\/g, '/');
-  return permalink;
+  // Process replacement patterns
+  return permalinks.process(structure, parsers, context);
 }

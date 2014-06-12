@@ -9,6 +9,67 @@
 var expect = require('chai').expect;
 var permalinks = require('../');
 
+
+// Custom function for task assemble:filename_replacement
+var toPostName = function(str) {
+  var path = require('path');
+  var name = path.basename(str, path.extname(str));
+  var re = /\d{4}-\d{2}-\d{2}-(.+)/;
+  // $1 = yyyy, $2 = mm, $3 = dd, $4 = basename
+  return name.replace(re, '$1');
+};
+
+// Custom function for task assemble:filename_replacement
+var toDateFolders = function(str) {
+  var path = require('path');
+  var name = path.basename(str, path.extname(str));
+  var re = /(\d{4})-(\d{2})-(\d{2})-(.+)/;
+  // $1 = yyyy, $2 = mm, $3 = dd, $4 = basename
+  return name.replace(re, function(str, yr, mo, day, basename) {
+    return yr + '/' + mo + '/' + day + '/' + basename;
+  });
+};
+
+
+describe('custom replacement patterns:', function() {
+  describe('paths', function() {
+    var opts = {
+      replacements: [{
+        pattern: ':post',
+        replacement: function(src) {
+          return toPostName(this.src);
+        }
+      }]
+    };
+    it('should replace :basename', function() {
+      var obj = {src: 'test/fixtures/posts/2014-12-31-last-year.md'};
+      var expected = 'last-year/index.html';
+      var actual = permalinks(':post/index.html', obj, opts);
+      expect(actual).to.eql(expected);
+    });
+  });
+});
+
+describe('custom replacement patterns:', function() {
+  describe('paths', function() {
+    var opts = {
+      replacements: [{
+        pattern: ':post',
+        replacement: function(src) {
+          return toDateFolders(this.src);
+        }
+      }]
+    };
+    it('should replace :basename', function() {
+      var obj = {src: 'test/fixtures/posts/2014-12-31-last-year.md', destBase: 'blog'};
+      var expected = 'blog/2014/12/31/last-year/index.html';
+      var actual = permalinks(':destBase/:post/index.html', obj, opts);
+      expect(actual).to.eql(expected);
+    });
+  });
+});
+
+
 describe('permalinks:', function() {
   describe('paths', function() {
     it('should replace :basename', function() {
@@ -32,17 +93,18 @@ describe('permalinks:', function() {
 describe('when a custom replacement pattern is supplied:', function() {
   describe('paths', function() {
     it('should replace :basename', function() {
-      var obj = {basename: 'foo', ext: '.html'};
+      var context = {basename: 'foo', ext: '.html'};
       var options = {
         replacements: [
           {
-            pattern: ':project',
+            pattern: /:project/,
             replacement: require('../package.json').name
           }
         ]
       };
       var expected = 'permalinks/foo/index.html';
-      var actual = permalinks(':project/:basename/index:ext', obj, options);
+      var actual = permalinks(':project/:basename/index:ext', context, options);
+
       expect(actual).to.eql(expected);
     });
   });
@@ -65,6 +127,7 @@ describe('permalinks:', function() {
       var actual = permalinks(':basename', obj);
       expect(actual).to.eql(expected);
     });
+
     it('should foo', function() {
       var obj = {basename: 'foo', ext: ''};
       var expected = 'foo';
@@ -139,7 +202,8 @@ describe('permalinks:', function() {
       var obj = {basename: 'foo', ext: '.md'};
       var expected = '2014/04/29/foo/index.md';
       var actual = permalinks(':YYYY/:MM/:DD/:basename/index:ext', obj);
-      expect(actual).to.equal(expected);
+      expect(actual.split('/')).to.have.length.above(4);
+      expect(actual.split('/')[0]).to.equal(String(new Date().getFullYear()));
     });
 
     it('when the :date structure is used', function() {
@@ -149,11 +213,11 @@ describe('permalinks:', function() {
       expect(actual).to.equal(expected);
     });
 
-    it('should foo', function() {
+    it('should parse the path using a date', function() {
       var obj = {basename: 'foo', ext: ''};
       var expected = '2014/04/29';
       var actual = permalinks(':YYYY/:MM/:DD', obj);
-      expect(actual).to.equal(expected);
+      expect(actual.split('/')).to.have.length.above(2);
     });
   });
 });
