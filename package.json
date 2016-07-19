@@ -3,23 +3,39 @@
   "description": "Adds permalink or URL routing/URL rewriting logic to any node.js project. Can be used in static site generators, build systems, web applications or anywhere you need to do path transformation or prop-string replacements.",
   "version": "0.3.1",
   "homepage": "https://github.com/jonschlinkert/permalinks",
-  "author": {
-    "name": "Jon Schlinkert",
-    "url": "https://github.com/jonschlinkert"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/jonschlinkert/permalinks.git"
-  },
+  "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
+  "repository": "jonschlinkert/permalinks",
   "bugs": {
     "url": "https://github.com/jonschlinkert/permalinks/issues"
   },
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/jonschlinkert/permalinks/blob/master/LICENSE-MIT"
-    }
+  "license": "MIT",
+  "files": [
+    "index.js",
+    "LICENSE",
+    "README.md"
   ],
+  "main": "index.js",
+  "engines": {
+    "node": ">=0.8"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "dependencies": {
+    "digits": "~0.1.4",
+    "lodash": "~2.4.1",
+    "parse-filepath": "^0.2.1",
+    "randomatic": "^0.1.4",
+    "strings": "^0.3.3",
+    "strings-parser-date": "^0.1.0",
+    "strings-parser-url": "^0.1.0",
+    "underscore.string": "~2.3.3"
+  },
+  "devDependencies": {
+    "verb": "~0.2.0",
+    "chai": "~1.9.1",
+    "mocha": "~1.18.2"
+  },
   "keywords": [
     "blog entry",
     "blog post",
@@ -35,30 +51,8 @@
     "routing",
     "transformation",
     "uri",
-    "URL rewriting",
     "url",
+    "URL rewriting",
     "url-routing"
-  ],
-  "main": "index.js",
-  "engines": {
-    "node": ">=0.8"
-  },
-  "scripts": {
-    "test": "mocha -R spec"
-  },
-  "devDependencies": {
-    "verb": "~0.2.0",
-    "chai": "~1.9.1",
-    "mocha": "~1.18.2"
-  },
-  "dependencies": {
-    "digits": "~0.1.4",
-    "lodash": "~2.4.1",
-    "parse-filepath": "^0.2.1",
-    "randomatic": "^0.1.4",
-    "strings": "^0.3.3",
-    "strings-parser-date": "^0.1.0",
-    "strings-parser-url": "^0.1.0",
-    "underscore.string": "~2.3.3"
-  }
+  ]
 }
