@@ -2,7 +2,6 @@
 
 var assert = require('assert');
 var permalink = require('..');
-var File = require('vinyl');
 
 describe('file properties:', function() {
   it('should context segments, without original path', function() {

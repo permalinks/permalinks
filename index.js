@@ -109,10 +109,10 @@ Permalinks.prototype.format = function(structure, file, locals) {
   }
 
   file = utils.formatFile(file, this.options);
-  var permalink = utils.assign({}, this.preset(structure), file.data.permalink);
-  var context = this.context(permalink, file, locals, this.options);
+  var context = this.context(file, locals, this.options);
+  var pattern = utils.get(file, 'data.permalink.structure') || this.preset(structure);
 
-  return this.render(permalink.structure, {
+  return this.render(pattern, {
     helpers: context.helpers,
     data: context.data
   });
@@ -135,9 +135,9 @@ Permalinks.prototype.format = function(structure, file, locals) {
 
 Permalinks.prototype.preset = function(name, structure) {
   if (arguments.length === 1) {
-    return this.presets[name] || { structure: name };
+    return this.presets[name] || name;
   }
-  this.presets[name] = { structure: structure };
+  this.presets[name] = structure;
   if (!this.helpers[name]) {
     this.helper(name, function() {
       return this.app.format(structure, this.file);
@@ -213,16 +213,15 @@ Permalinks.prototype.render = function(str, options) {
  * the library.
  *
  * ```js
- * permalinks.context(permalink, file, locals, options);
+ * permalinks.context(file, locals, options);
  * ```
- * @param {Object} `permalink`
  * @param {Object} `file`
  * @param {Object} `locals`
  * @param {Object} `options`
  * @return {Object}
  */
 
-Permalinks.prototype.context = function(permalink, file, locals, options) {
+Permalinks.prototype.context = function(file, locals, options) {
   var fileData = utils.assign({}, file.data, file.data.permalink);
   var context = utils.assign({}, this.parse(file), this.data, locals, fileData);
   var helpers = utils.assign({}, this.helpers);

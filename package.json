@@ -24,17 +24,11 @@
   "dependencies": {
     "assign-deep": "^0.4.5",
     "deep-bind": "^0.3.0",
-    "extend-shallow": "^2.0.1",
     "get-value": "^2.0.6",
     "handlebars": "^4.0.6",
     "isobject": "^3.0.0",
     "lazy-cache": "^2.0.2",
     "parse-filepath": "^1.0.1",
-    "regex-not": "^1.0.0",
-    "snapdragon": "^0.10.1",
-    "snapdragon-capture": "^0.2.0",
-    "snapdragon-capture-set": "^1.0.1",
-    "snapdragon-util": "^1.0.5",
     "vinyl": "^2.0.1"
   },
   "devDependencies": {

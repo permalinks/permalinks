@@ -61,6 +61,10 @@ describe('convert syntax', function() {
     assert.equal(convert(':root/:a:b(foo)'), '{{root}}/{{a}}{{b foo}}');
   });
 
+  it('should convert helper expressions with slashes in arguments', function() {
+    assert.equal(convert(':date(file, "YYYY/MM/DD")/:stem/index.html'), '{{date file "YYYY/MM/DD"}}/{{stem}}/index.html');
+  });
+
   it('should work with file extensions', function() {
     assert.equal(convert(':base/:upper(name)/index.:ext'), '{{base}}/{{upper name}}/index.{{ext}}');
   });
@@ -84,30 +88,34 @@ describe('convert syntax', function() {
   });
 
   it('should convert nested helper expressions', function() {
-    [[
-      ':name("foo" (lower "bar"))',
-      '{{name "foo" (lower "bar")}}'
-    ],
-    [
-      ':name((lower "bar"))',
-      '{{name (lower "bar")}}'
-    ],
-    [
-      ':name(lower "bar")',
-      '{{name lower "bar"}}'
-    ],
-    [
-      ':root/:name("foo" (lower "bar"))/foo.hbs',
-      '{{root}}/{{name "foo" (lower "bar")}}/foo.hbs'
-    ],
-    [
-      '\\:root/:name("foo" (lower "bar"))/foo.hbs',
-      ':root/{{name "foo" (lower "bar")}}/foo.hbs'
-    ],
-    [
-      '\\:root/:name("foo" (lower (upper "bar")))/foo.hbs',
-      ':root/{{name "foo" (lower (upper "bar"))}}/foo.hbs'
-    ]].forEach(function(arr) {
+    var units = [
+      [
+        ':name("foo" (lower "bar"))',
+        '{{name "foo" (lower "bar")}}'
+      ],
+      [
+        ':name((lower "bar"))',
+        '{{name (lower "bar")}}'
+      ],
+      [
+        ':name(lower "bar")',
+        '{{name lower "bar"}}'
+      ],
+      [
+        ':root/:name("foo" (lower "bar"))/foo.hbs',
+        '{{root}}/{{name "foo" (lower "bar")}}/foo.hbs'
+      ],
+      [
+        '\\:root/:name("foo" (lower "bar"))/foo.hbs',
+        ':root/{{name "foo" (lower "bar")}}/foo.hbs'
+      ],
+      [
+        '\\:root/:name("foo" (lower (upper "bar")))/foo.hbs',
+        ':root/{{name "foo" (lower (upper "bar"))}}/foo.hbs'
+      ]
+    ];
+
+    units.forEach(function(arr) {
       assert.equal(convert(arr[0]), arr[1]);
     });
   });
