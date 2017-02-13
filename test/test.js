@@ -1,223 +1,167 @@
-/**
-  * permalinks <https://github.com/assemble/permalinks>
-  *
-  * Copyright (c) 2014, Jon Schlinkert, Brian Woodward, contributors.
-  * Licensed under the MIT License
-  *
-  */
+'use strict';
 
-var expect = require('chai').expect;
-var permalinks = require('../');
-
-
-// Custom function for task assemble:filename_replacement
-var toPostName = function(str) {
-  var path = require('path');
-  var name = path.basename(str, path.extname(str));
-  var re = /\d{4}-\d{2}-\d{2}-(.+)/;
-  // $1 = yyyy, $2 = mm, $3 = dd, $4 = basename
-  return name.replace(re, '$1');
-};
-
-// Custom function for task assemble:filename_replacement
-var toDateFolders = function(str) {
-  var path = require('path');
-  var name = path.basename(str, path.extname(str));
-  var re = /(\d{4})-(\d{2})-(\d{2})-(.+)/;
-  // $1 = yyyy, $2 = mm, $3 = dd, $4 = basename
-  return name.replace(re, function(str, yr, mo, day, basename) {
-    return yr + '/' + mo + '/' + day + '/' + basename;
-  });
-};
-
-
-describe('custom replacement patterns:', function() {
-  describe('paths', function() {
-    var opts = {
-      replacements: [{
-        pattern: ':post',
-        replacement: function(src) {
-          return toPostName(this.src);
-        }
-      }]
-    };
-    it('should replace :basename', function() {
-      var obj = {src: 'test/fixtures/posts/2014-12-31-last-year.md'};
-      var expected = 'last-year/index.html';
-      var actual = permalinks(':post/index.html', obj, opts);
-      expect(actual).to.eql(expected);
-    });
-  });
-});
-
-describe('custom replacement patterns:', function() {
-  describe('paths', function() {
-    var opts = {
-      replacements: [{
-        pattern: ':post',
-        replacement: function(src) {
-          return toDateFolders(this.src);
-        }
-      }]
-    };
-    it('should replace :basename', function() {
-      var obj = {src: 'test/fixtures/posts/2014-12-31-last-year.md', destBase: 'blog'};
-      var expected = 'blog/2014/12/31/last-year/index.html';
-      var actual = permalinks(':destBase/:post/index.html', obj, opts);
-      expect(actual).to.eql(expected);
-    });
-  });
-});
-
+var assert = require('assert');
+var moment = require('moment');
+var Permalinks = require('..');
+var permalink = require('..');
+var random = require('randomatic');
+var File = require('vinyl');
+var permalinks;
 
 describe('permalinks:', function() {
-  describe('paths', function() {
-    it('should replace :basename', function() {
-      var obj = {basename: 'foo', ext: '.html'};
-      var expected = 'foo/index.html';
-      var actual = permalinks({preset: 'pretty', context: obj});
-      expect(actual).to.eql(expected);
+  describe('variables', function() {
+    it('should replace :params with data from locals', function() {
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      var fixture = permalink(':name/index.html', file, {name: 'abc'});
+      assert.equal(fixture, 'abc/index.html');
+    });
+
+    it('should replace :params with path segments', function() {
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      assert.equal(permalink(':stem/index.html', file), 'baz/index.html');
+      assert.equal(permalink(':dirname/index.html', file), 'foo/bar/index.html');
     });
   });
 
-  describe('paths', function() {
-    it('should replace :basename', function() {
-      var obj = {basename: 'foo', ext: '.html'};
-      var expected = 'foo/index.html';
-      var actual = permalinks(obj, {preset: 'pretty'});
-      expect(actual).to.eql(expected);
-    });
-  });
-});
+  describe('helpers', function() {
+    it('should use helpers to replace :params', function() {
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      var permalinks = new Permalinks();
 
-describe('when a custom replacement pattern is supplied:', function() {
-  describe('paths', function() {
-    it('should replace :basename', function() {
-      var context = {basename: 'foo', ext: '.html'};
-      var options = {
-        replacements: [
-          {
-            pattern: /:project/,
-            replacement: require('../package.json').name
-          }
-        ]
-      };
-      var expected = 'permalinks/foo/index.html';
-      var actual = permalinks(':project/:basename/index:ext', context, options);
+      permalinks.helper('zzz', function() {
+        return this.file.stem;
+      });
 
-      expect(actual).to.eql(expected);
-    });
-  });
-
-  describe('paths', function() {
-    it('should replace :basename', function() {
-      var obj = {basename: 'foo', ext: '.html'};
-      var expected = 'foo/index.html';
-      var actual = permalinks(obj, {preset: 'pretty'});
-      expect(actual).to.eql(expected);
-    });
-  });
-});
-
-describe('permalinks:', function() {
-  describe('paths', function() {
-    it('should replace :basename', function() {
-      var obj = {basename: 'foo'};
-      var expected = 'foo';
-      var actual = permalinks(':basename', obj);
-      expect(actual).to.eql(expected);
+      var fixture = permalinks.format(':zzz/index.html', file);
+      assert.equal(fixture, 'baz/index.html');
     });
 
-    it('should foo', function() {
-      var obj = {basename: 'foo', ext: ''};
-      var expected = 'foo';
-      var actual = permalinks(':basename:ext', obj);
-      expect(actual).to.equal(expected);
+    it('should use helpers with arguments to replace :params', function() {
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      var permalinks = new Permalinks();
+
+      permalinks.helper('zzz', function(val) {
+        return val;
+      });
+
+      var fixture = permalinks.format(':zzz(aaa)/index.html', file, {aaa: 'bbb'});
+      assert.equal(fixture, 'bbb/index.html');
     });
 
-    it('should replace :basename', function() {
-      var obj = {basename: 'foo', ext: '.html'};
-      var expected = 'foo.html';
-      var actual = permalinks(':basename:ext', obj);
-      expect(actual).to.eql(expected);
+    it('should use helpers with subexpressions to replace :params', function() {
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      var permalinks = new Permalinks();
+
+      permalinks.helper('zzz', function(val) {
+        return val;
+      });
+
+      permalinks.helper('upper', function(val) {
+        return val.toUpperCase();
+      });
+
+      var locals = {aaa: 'bbb'};
+      var structure = ':upper((zzz aaa))/index.html';
+      var fixture = permalinks.format(structure, file, locals);
+      assert.equal(fixture, 'BBB/index.html');
     });
 
-    it('should foo', function() {
-      var obj = {basename: 'foo', ext: ''};
-      var expected = 'foo/index';
-      var actual = permalinks(':basename/index:ext', obj);
-      expect(actual).to.equal(expected);
-    });
+    it('should use helpers with nested subexpressions', function() {
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      var permalinks = new Permalinks();
 
-    it('should foo', function() {
-      var obj = {section: 'foo'};
-      var expected = 'foo';
-      var actual = permalinks(':section', obj);
-      expect(actual).to.equal(expected);
-    });
+      permalinks.helper('zzz', function(val) {
+        return val;
+      });
 
-    it('when an arbitrary property is on the context', function() {
-      var obj = {section: 'foo', ext: ''};
-      var expected = 'foo';
-      var actual = permalinks(':section', obj);
-      expect(actual).to.equal(expected);
-    });
+      permalinks.helper('upper', function(val) {
+        return val.toUpperCase();
+      });
 
-    it('when :0000 is passed', function() {
-      var obj = {basename: 'favicon', section: 'images', ext: '.png'};
-      var expected = 'images/favicon-0000.png';
-      var actual = permalinks(':section/:basename-:0000:ext', obj);
-      expect(actual).to.equal(expected);
-    });
+      permalinks.helper('dashify', function(val) {
+        return val.split('').join('-');
+      });
 
-    it('when :0000 is passed', function() {
-      var obj = {basename: 'favicon', section: 'images', ext: '.png'};
-      var expected = 'images/favicon-0121.png';
-      var actual = permalinks(':section/:basename-:0000:ext', obj, {index: 121});
-      expect(actual).to.equal(expected);
-    });
-
-    it('should foo', function() {
-      var obj = {basename: 'favicon', section: 'images', ext: '.png'};
-      var expected = 'images/favicon-0.png';
-      var actual = permalinks(':section/:basename-:num:ext', obj);
-      expect(actual).to.equal(expected);
-    });
-
-    it('should foo', function() {
-      var obj = {basename: 'favicon', section: 'images', ext: '.png'};
-      var expected = 'images/favicon-0000.png';
-      var actual = permalinks(':section/:basename-:num:ext', obj, {length: 1000});
-      expect(actual).to.equal(expected);
+      var locals = {aaa: 'bbb'};
+      var structure = ':upper((zzz (dashify aaa)))/index.html';
+      var fixture = permalinks.format(structure, file, locals);
+      assert.equal(fixture, 'B-B-B/index.html');
     });
 
     it('when a structure is defined with :random()', function() {
-      var obj = {basename: 'favicon', section: 'images', ext: '.png'};
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      var permalinks = new Permalinks();
+
+      permalinks.helper('random', function(val) {
+        return random.apply(null, val.split(','));
+      });
+
+      var file = {basename: 'favicon', section: 'images', ext: '.png'};
       var expected = 'images/';
-      var actual = permalinks(':section/:random(0Aa,9)-:basename:ext', obj);
-      expect(actual.length).to.equal(28);
+      var actual = permalinks.format(':section/:random("0Aa,9")-:basename:ext', file);
+      assert.equal(actual.length, 28);
     });
 
-    it('when a structure is passed with a year, month and day pattern', function() {
-      var obj = {basename: 'foo', ext: '.md'};
-      var expected = '2014/04/29/foo/index.md';
-      var actual = permalinks(':YYYY/:MM/:DD/:basename/index:ext', obj);
-      expect(actual.split('/')).to.have.length.above(4);
-      expect(actual.split('/')[0]).to.equal(String(new Date().getFullYear()));
+    it('should call helperMissing when variables are not resolved', function() {
+      var file = {basename: 'foo', ext: '.md'};
+      var permalinks = new Permalinks();
+
+      permalinks.helper('helperMissing', function(options) {
+        var name = options.name;
+        var file = this.file;
+
+        switch (name) {
+          case 'YYYY':
+          case 'MM':
+          case 'DD':
+            return moment(new Date()).format(name);
+          default: {
+            throw new Error('cannot resolve :' + name);
+            break;
+          }
+        }
+      });
+
+      var expected = moment(new Date()).format('YYYY/MM/DD') + '/foo/index.md';
+      var actual = permalinks.format(':YYYY/:MM/:DD/:basename/index:ext', file);
+      assert.equal(actual, expected);
     });
 
-    it('when the :date structure is used', function() {
-      var obj = {basename: 'foo', ext: '.md', date: '2013-02-13'};
-      var expected = '2013/02/13/index.md';
-      var actual = permalinks(':date/index:ext', obj);
-      expect(actual).to.equal(expected);
+  // it('should parse the path using a date', function() {
+  //   var obj = {basename: 'foo', ext: ''};
+  //   var expected = '2014/04/29';
+  //   var actual = permalink(':YYYY/:MM/:DD', obj);
+  //   expect(actual.split('/')).to.have.length.above(2);
+  // });
+  });
+
+  describe('presets', function() {
+    it('should use presets', function() {
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      var permalinks = new Permalinks();
+
+      permalinks.preset('pretty', 'blog/:stem/index.html');
+      var fixture = permalinks.format('pretty', file);
+      assert.equal(fixture, 'blog/baz/index.html');
     });
 
-    it('should parse the path using a date', function() {
-      var obj = {basename: 'foo', ext: ''};
-      var expected = '2014/04/29';
-      var actual = permalinks(':YYYY/:MM/:DD', obj);
-      expect(actual.split('/')).to.have.length.above(2);
+    it('should work when preset is defined as a variable', function() {
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      var permalinks = new Permalinks();
+
+      permalinks.preset('pretty', 'blog/:stem/index.html');
+      var fixture = permalinks.format(':pretty', file);
+      assert.equal(fixture, 'blog/baz/index.html');
+    });
+
+    it('should work when multiple presets are used', function() {
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      var permalinks = new Permalinks();
+
+      permalinks.preset('one', 'blog');
+      permalinks.preset('two', ':stem/index.html');
+      var fixture = permalinks.format(':one/:two', file);
+      assert.equal(fixture, 'blog/baz/index.html');
     });
   });
 });
