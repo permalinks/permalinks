@@ -4,16 +4,12 @@ var convert = require('./lib/convert');
 var utils = require('./lib/utils');
 
 /**
- * Create an instance of `Permalinks` with the given `options`, or
- * permalink structure. If a structure is passed, the the [.format](#format)
- * method is called, which expects the second argument to be a `file`
- * object or string.
+ * Create an instance of `Permalinks` with the given `options`
  *
  * ```js
- * var options = {};
- * var permalinks = new Permalinks(options);
- * // or
- * var permalinks = new Permalinks(':foo/index.html', file, options);
+ * var permalinks = new Permalinks();
+ * console.log(permalinks.format(':stem/index.html'), {path: 'src/about.hbs'});
+ * //=> 'about/index.html'
  * ```
  * @param {Options|String} `options`
  * @api public
@@ -70,7 +66,6 @@ Permalinks.prototype.parse = function(file) {
   if (!utils.isObject(file)) {
     throw new TypeError('expected file to be an object');
   }
-  if (file.data && file.data.parse === false) return file;
   if (!file.path) return file;
   var data = utils.parse(file.path);
   for (var key in file) {
@@ -187,22 +182,6 @@ Permalinks.prototype.helper = function(name, fn) {
 };
 
 /**
- * Calls [handlebars][] to render the specified template `string` using
- * the given `options`.
- *
- * @param {String} `str`
- * @param {Object} `options`
- * @return {String} Returns the fully resolved permalink string.
- */
-
-Permalinks.prototype.render = function(str, options) {
-  var hbs = utils.handlebars.create();
-  hbs.registerHelper(options.helpers);
-  var fn = hbs.compile(convert(str));
-  return fn(options.data);
-};
-
-/**
  * Create the context to use when rendering permalinks. In addition to creating
  * the data object that is used for resolving `:props`, this method also binds
  * a context that is exposed as `this` inside helpers. In particular, the `this`
@@ -246,7 +225,7 @@ Permalinks.prototype.context = function(file, locals, options) {
 
   helpers = utils.deepBind(helpers, ctx);
   if (typeof helpers.file === 'function') {
-    helpers.file(file, ctx, locals);
+    helpers.file(file, data, locals);
     delete helpers.file;
   }
 
@@ -257,6 +236,22 @@ Permalinks.prototype.context = function(file, locals, options) {
     helpers: helpers,
     data: data
   };
+};
+
+/**
+ * Calls [handlebars][] to render the specified template `string` using
+ * the given `options`.
+ *
+ * @param {String} `str`
+ * @param {Object} `options`
+ * @return {String} Returns the fully resolved permalink string.
+ */
+
+Permalinks.prototype.render = function(str, options) {
+  var hbs = utils.handlebars.create();
+  hbs.registerHelper(options.helpers);
+  var fn = hbs.compile(convert(str));
+  return fn(options.data);
 };
 
 /**

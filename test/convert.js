@@ -94,6 +94,10 @@ describe('convert syntax', function() {
         '{{name "foo" (lower "bar")}}'
       ],
       [
+        ':name(foo (lower "bar"))',
+        '{{name foo (lower "bar")}}'
+      ],
+      [
         ':name((lower "bar"))',
         '{{name (lower "bar")}}'
       ],

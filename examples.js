@@ -96,3 +96,7 @@ console.log(file2);
 
 console.log(file3);
 //=> '2017/01/01/about/index.html'
+
+
+console.log(permalinks.format(':name/index.html', {path: 'src/about.hbs'}));
+//=> 'about/index.html'

@@ -19,6 +19,21 @@ describe('helpers', function() {
     assert.equal(fixture, 'baz/index.html');
   });
 
+  it('should call the "file" helper on every pattern', function() {
+    var file = new File({path: 'foo/bar/baz.hbs'});
+    var permalinks = new Permalinks();
+    var count = 0;
+
+    permalinks.helper('file', function(file, data, locals) {
+      data.num = ++count;
+    });
+
+    assert.equal(permalinks.format(':stem-:num', file), 'baz-1');
+    assert.equal(permalinks.format(':stem-:num', file), 'baz-2');
+    assert.equal(permalinks.format(':stem-:num', file), 'baz-3');
+    assert.equal(count, 3);
+  });
+
   it('should use helpers with arguments to replace :params', function() {
     var file = new File({path: 'foo/bar/baz.hbs'});
     var permalinks = new Permalinks();

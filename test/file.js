@@ -9,6 +9,7 @@ describe('file properties:', function() {
     assert.equal(permalink(':basename/index:ext', {basename: 'foo', ext: ''}), 'foo/index');
     assert.equal(permalink(':section', {section: 'foo', ext: ''}), 'foo');
     assert.equal(permalink(':section', {section: 'foo'}), 'foo');
+    assert.equal(permalink(':section/abc', {section: 'foo'}), 'foo/abc');
   });
 
   it('should handle file as a string', function() {
