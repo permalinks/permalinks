@@ -1,7 +1,0 @@
-{
-  "name": "permalinks",
-  "version": "0.3.0",
-  "main": [
-    "index.js"
-  ]
-}
