@@ -32,7 +32,6 @@ function Permalinks(options) {
   this.helpers = this.options.helpers || {};
   this.presets = this.options.presets || {};
   this.data = this.options.data || {};
-  this.helper('helperMissing', helperMissing);
 }
 
 /**
@@ -123,7 +122,7 @@ Permalinks.prototype.format = function(structure, file, locals) {
  * //=> 'blog/about/index.html'
  * ```
  * @param {String} `name` If only the name is passed,
- * @param {String|Object} `structure`
+ * @param {String} `structure`
  * @return {Object} Returns the `Permalinks` instance for chaining
  * @api public
  */
@@ -248,6 +247,10 @@ Permalinks.prototype.context = function(file, locals, options) {
  */
 
 Permalinks.prototype.render = function(str, options) {
+  if (!this.helpers.helperMissing) {
+    this.helper('helperMissing', helperMissing);
+  }
+
   var hbs = utils.handlebars.create();
   hbs.registerHelper(options.helpers);
   var fn = hbs.compile(convert(str));
