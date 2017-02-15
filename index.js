@@ -1,5 +1,7 @@
 'use strict';
 
+var use = require('use');
+var handlebars = require('handlebars');
 var convert = require('./lib/convert');
 var utils = require('./lib/utils');
 
@@ -32,6 +34,8 @@ function Permalinks(options) {
   this.helpers = this.options.helpers || {};
   this.presets = this.options.presets || {};
   this.data = this.options.data || {};
+  this.fns = [];
+  use(this);
 }
 
 /**
@@ -102,14 +106,10 @@ Permalinks.prototype.format = function(structure, file, locals) {
     file = { path: file };
   }
 
-  file = utils.formatFile(file, this.options);
+  file = this.normalizeFile(file, this.options);
   var context = this.context(file, locals, this.options);
   var pattern = utils.get(file, 'data.permalink.structure') || this.preset(structure);
-
-  return this.render(pattern, {
-    helpers: context.helpers,
-    data: context.data
-  });
+  return this.render(pattern, context);
 };
 
 /**
@@ -176,7 +176,11 @@ Permalinks.prototype.preset = function(name, structure) {
  */
 
 Permalinks.prototype.helper = function(name, fn) {
-  this.helpers[name] = fn;
+  if (name === 'context') {
+    this.fns.push(fn);
+  } else {
+    this.helpers[name] = fn;
+  }
   return this;
 };
 
@@ -200,10 +204,11 @@ Permalinks.prototype.helper = function(name, fn) {
  */
 
 Permalinks.prototype.context = function(file, locals, options) {
+  var opts = utils.assign({}, this.options, options);
   var fileData = utils.assign({}, file.data, file.data.permalink);
   var context = utils.assign({}, this.parse(file), this.data, locals, fileData);
   var helpers = utils.assign({}, this.helpers);
-  var ctx = utils.assign({}, {app: this}, {options: options});
+  var ctx = utils.assign({}, {app: this}, {options: opts});
   var data = {};
 
   for (var key in context) {
@@ -222,6 +227,10 @@ Permalinks.prototype.context = function(file, locals, options) {
   ctx.context = data;
   ctx.file = file;
 
+  for (var i = 0; i < this.fns.length; i++) {
+    this.fns[i].call(this, ctx.context);
+  }
+
   helpers = utils.deepBind(helpers, ctx);
   if (typeof helpers.file === 'function') {
     helpers.file(file, data, locals);
@@ -231,7 +240,7 @@ Permalinks.prototype.context = function(file, locals, options) {
   data.file = file;
 
   return {
-    options: options,
+    options: opts,
     helpers: helpers,
     data: data
   };
@@ -246,15 +255,29 @@ Permalinks.prototype.context = function(file, locals, options) {
  * @return {String} Returns the fully resolved permalink string.
  */
 
-Permalinks.prototype.render = function(str, options) {
+Permalinks.prototype.render = function(structure, options) {
   if (!this.helpers.helperMissing) {
     this.helper('helperMissing', helperMissing);
   }
 
-  var hbs = utils.handlebars.create();
+  var hbs = handlebars.create();
   hbs.registerHelper(options.helpers);
-  var fn = hbs.compile(convert(str));
+
+  var str = convert(structure);
+  var fn = hbs.compile(str);
   return fn(options.data);
+};
+
+/**
+ *
+ *
+ * @param {String} `str`
+ * @param {Object} `options`
+ * @return {String} Returns the fully resolved permalink string.
+ */
+
+Permalinks.prototype.normalizeFile = function(file, options) {
+  return utils.normalizeFile(file, options);
 };
 
 /**

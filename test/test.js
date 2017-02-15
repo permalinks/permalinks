@@ -17,5 +17,11 @@ describe('permalinks:', function() {
       assert.equal(permalink(':stem/index.html', file), 'baz/index.html');
       assert.equal(permalink(':dirname/index.html', file), 'foo/bar/index.html');
     });
+
+    it('should work with handlebars syntax', function() {
+      var file = new File({path: 'foo/bar/baz.hbs'});
+      assert.equal(permalink('{{stem}}/index.html', file), 'baz/index.html');
+      assert.equal(permalink('{{dirname}}/index.html', file), 'foo/bar/index.html');
+    });
   });
 });
