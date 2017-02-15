@@ -190,6 +190,12 @@ console.log(count);
 
 ## About
 
+### Related projects
+
+* [handlebars](https://www.npmjs.com/package/handlebars): Handlebars provides the power necessary to let you build semantic templates effectively with no frustration | [homepage](http://www.handlebarsjs.com/ "Handlebars provides the power necessary to let you build semantic templates effectively with no frustration")
+* [parse-filepath](https://www.npmjs.com/package/parse-filepath): Pollyfill for node.js `path.parse`, parses a filepath into an object. | [homepage](https://github.com/jonschlinkert/parse-filepath "Pollyfill for node.js `path.parse`, parses a filepath into an object.")
+* [vinyl](https://www.npmjs.com/package/vinyl): Virtual file format. | [homepage](https://github.com/gulpjs/vinyl#readme "Virtual file format.")
+
 ### Contributing
 
 Pull requests and stars are always welcome. For bugs and feature requests, [please create an issue](../../issues/new).
