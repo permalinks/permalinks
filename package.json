@@ -1,7 +1,7 @@
 {
   "name": "permalinks",
   "description": "Adds permalink or URL routing/URL rewriting logic to any node.js project. Can be used in static site generators, build systems, web applications or anywhere you need to do path transformation or prop-string replacements.",
-  "version": "0.3.1",
+  "version": "1.0.0",
   "homepage": "https://github.com/jonschlinkert/permalinks",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
   "repository": "jonschlinkert/permalinks",
@@ -11,8 +11,7 @@
   "license": "MIT",
   "files": [
     "index.js",
-    "lib",
-    "utils.js"
+    "lib"
   ],
   "main": "index.js",
   "engines": {
@@ -28,14 +27,19 @@
     "handlebars": "^4.0.6",
     "isobject": "^3.0.0",
     "lazy-cache": "^2.0.2",
+    "lodash.template": "^4.4.0",
     "parse-filepath": "^1.0.1",
+    "use": "^2.0.0",
     "vinyl": "^2.0.1"
   },
   "devDependencies": {
+    "diacritics-map": "^0.1.0",
     "gulp-format-md": "^0.1.11",
+    "kind-of": "^3.1.0",
     "mocha": "^3.2.0",
     "moment": "^2.17.1",
-    "randomatic": "^1.1.6"
+    "randomatic": "^1.1.6",
+    "strip-color": "^0.1.0"
   },
   "keywords": [
     "blog entry",
@@ -67,6 +71,13 @@
     ],
     "lint": {
       "reflinks": true
-    }
+    },
+    "related": {
+      "list": []
+    },
+    "reflinks": [
+      "parse-filepath",
+      "vinyl"
+    ]
   }
 }
