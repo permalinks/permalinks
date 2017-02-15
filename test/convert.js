@@ -34,12 +34,24 @@ describe('convert syntax', function() {
     assert.equal(convert(':f_o_o:bar'), '{{f_o_o}}{{bar}}');
     assert.equal(convert(':!--foo--:bar'), '{{!--foo--}}{{bar}}');
     assert.equal(convert(':!foo:bar'), '{{!foo}}{{bar}}');
+    assert.equal(convert(':#if(bar):foo:^other:/if'), '{{#if bar}}{{foo}}{{^}}other{{/if}}');
+    assert.equal(convert(':^foo:bar'), '{{^}}foo{{bar}}');
     assert.equal(convert(':*foo:bar'), '{{* foo}}{{bar}}');
     assert.equal(convert(':>foo:bar'), '{{> foo}}{{bar}}');
   });
 
   it('should not convert escaped segments', function() {
     assert.equal(convert('\\:foo:bar'), ':foo{{bar}}');
+  });
+
+  it('should throw an error on when an invalid block is defined', function(cb) {
+    try {
+      convert(':#if(bar):foo:^other:/zzz');
+      cb(new Error('expected an error'));
+    } catch (err) {
+      assert(/\{\{\/zzz\}\}/.test(err.message));
+      cb();
+    }
   });
 
   it('should convert variables with dot-notation', function() {
@@ -54,11 +66,20 @@ describe('convert syntax', function() {
     assert.equal(convert(':foo.bar/:b.:az.:qux'), '{{foo.bar}}/{{b}}.{{az}}.{{qux}}');
   });
 
-  it('should convert helper expressions', function() {
+  it('should convert empty helper expressions', function() {
+    assert.equal(convert(':a()'), '{{a}}');
+  });
+
+  it('should convert helper expressions with arguments', function() {
     assert.equal(convert(':a(foo)'), '{{a foo}}');
     assert.equal(convert(':a(foo)'), '{{a foo}}');
     assert.equal(convert(':root/:a(foo)'), '{{root}}/{{a foo}}');
     assert.equal(convert(':root/:a:b(foo)'), '{{root}}/{{a}}{{b foo}}');
+  });
+
+  it('should convert helper expressions with dot arguments', function() {
+    assert.equal(convert(':a(., "foo")'), '{{a . "foo"}}');
+    assert.equal(convert(':a(.)'), '{{a .}}');
   });
 
   it('should convert helper expressions with slashes in arguments', function() {
@@ -108,6 +129,14 @@ describe('convert syntax', function() {
       [
         ':root/:name("foo" (lower "bar"))/foo.hbs',
         '{{root}}/{{name "foo" (lower "bar")}}/foo.hbs'
+      ],
+      [
+        ':root/:name(. (lower .))/foo.hbs',
+        '{{root}}/{{name . (lower .)}}/foo.hbs'
+      ],
+      [
+        ':root/:name("foo" (lower .))/foo.hbs',
+        '{{root}}/{{name "foo" (lower .)}}/foo.hbs'
       ],
       [
         '\\:root/:name("foo" (lower "bar"))/foo.hbs',
