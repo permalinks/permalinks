@@ -15,7 +15,7 @@
   ],
   "main": "index.js",
   "engines": {
-    "node": ">=0.4.7"
+    "node": ">=4.7"
   },
   "scripts": {
     "test": "mocha"
@@ -27,19 +27,15 @@
     "handlebars": "^4.0.6",
     "isobject": "^3.0.0",
     "lazy-cache": "^2.0.2",
-    "lodash.template": "^4.4.0",
     "parse-filepath": "^1.0.1",
     "use": "^2.0.0",
     "vinyl": "^2.0.1"
   },
   "devDependencies": {
-    "diacritics-map": "^0.1.0",
     "gulp-format-md": "^0.1.11",
-    "kind-of": "^3.1.0",
     "mocha": "^3.2.0",
     "moment": "^2.17.1",
-    "randomatic": "^1.1.6",
-    "strip-color": "^0.1.0"
+    "randomatic": "^1.1.6"
   },
   "keywords": [
     "blog entry",
@@ -69,15 +65,19 @@
     "plugins": [
       "gulp-format-md"
     ],
-    "lint": {
-      "reflinks": true
-    },
     "related": {
-      "list": []
+      "list": [
+        "parse-filepath",
+        "handlebars",
+        "vinyl"
+      ]
     },
     "reflinks": [
       "parse-filepath",
       "vinyl"
-    ]
+    ],
+    "lint": {
+      "reflinks": true
+    }
   }
 }
