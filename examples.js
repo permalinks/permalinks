@@ -100,3 +100,5 @@ console.log(file3);
 
 console.log(permalinks.format(':name/index.html', {path: 'src/about.hbs'}));
 //=> 'about/index.html'
+
+console.log(permalinks.normalizeFile({path: 'foo.hbs'}))

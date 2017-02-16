@@ -116,11 +116,6 @@ Permalinks.prototype.format = function(structure, file, locals) {
     file = structure;
     structure = null;
   }
-
-  if (typeof file === 'string') {
-    file = { path: file };
-  }
-
   file = this.normalizeFile(file, this.options);
   var context = this.buildContext(file, locals, this.options);
   var pattern = utils.get(file, 'data.permalink.structure') || this.preset(structure);
@@ -306,14 +301,28 @@ Permalinks.prototype.render = function(structure, options) {
 };
 
 /**
+ * Normalize the given `file` to be a [vinyl][] file object.
  *
+ * ```js
+ * var file = permalinks.normalizeFile('foo.hbs');
+ * console.log(file);
+ * //=> '<File "foo.hbs">'
+ * ```
  *
- * @param {String} `str`
+ * @param {String|Object} `file` If `file` is a string, it will be converted to the `file.path` on a file object.
+ * @param {Object} `file`
  * @param {Object} `options`
- * @return {String} Returns the fully resolved permalink string.
+ * @return {Object} Returns the normalize [vinyl][] file.
+ * @api public
  */
 
 Permalinks.prototype.normalizeFile = function(file, options) {
+  options = options || {};
+
+  if (typeof file === 'string') {
+    file = { path: file };
+  }
+
   return utils.normalizeFile(file, options);
 };
 
