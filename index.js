@@ -2,6 +2,7 @@
 
 var use = require('use');
 var handlebars = require('handlebars');
+var helperSlugify = require('./lib/slugify');
 var convert = require('./lib/convert');
 var utils = require('./lib/utils');
 
@@ -23,20 +24,34 @@ function Permalinks(options) {
     Permalinks.call(proto);
     return proto.format.apply(proto, arguments);
   }
-
   if (!(this instanceof Permalinks)) {
     let proto = Object.create(Permalinks.prototype);
     Permalinks.call(proto);
     return proto;
   }
+  this.init(options);
+}
 
+/**
+ * Initialize defaults
+ */
+
+Permalinks.prototype.init = function(options) {
   this.options = utils.assign({}, options);
   this.helpers = this.options.helpers || {};
   this.presets = this.options.presets || {};
   this.data = this.options.data || {};
   this.fns = [];
-  use(this);
-}
+
+  use(this, {prop: '_fns'});
+
+  if (!this.helpers.helperMissing) {
+    this.helper('helperMissing', helperMissing);
+  }
+  if (!this.helpers.slugify) {
+    this.helper('slugify', helperSlugify);
+  }
+};
 
 /**
  * Uses [parse-filepath][] to parse the `file.path` on the given file
@@ -107,7 +122,7 @@ Permalinks.prototype.format = function(structure, file, locals) {
   }
 
   file = this.normalizeFile(file, this.options);
-  var context = this.context(file, locals, this.options);
+  var context = this.buildContext(file, locals, this.options);
   var pattern = utils.get(file, 'data.permalink.structure') || this.preset(structure);
   return this.render(pattern, context);
 };
@@ -176,11 +191,32 @@ Permalinks.prototype.preset = function(name, structure) {
  */
 
 Permalinks.prototype.helper = function(name, fn) {
-  if (name === 'context') {
-    this.fns.push(fn);
-  } else {
-    this.helpers[name] = fn;
-  }
+  this.helpers[name] = fn;
+  return this;
+};
+
+/**
+ * Add a function for calculating the context at render time. Any
+ * number of context functions may be used, and they are called in
+ * the order in which they are defined.
+ *
+ * ```js
+ * permalinks.context(function(file, context) {
+ *   context.site = { title: 'My Blog' };
+ * });
+ *
+ * permalinks.helper('title', function() {
+ *   return this.file.data.title || this.context.site.title;
+ * });
+ * ```
+ *
+ * @param {Function} `fn` Function that takes the `file` being rendered and the `context` as arguments. The permalinks instance is exposed as `this` inside the function.
+ * @return {Object} Returns the instance for chaining.
+ * @api public
+ */
+
+Permalinks.prototype.context = function(fn) {
+  this.fns.push(fn);
   return this;
 };
 
@@ -203,7 +239,7 @@ Permalinks.prototype.helper = function(name, fn) {
  * @return {Object}
  */
 
-Permalinks.prototype.context = function(file, locals, options) {
+Permalinks.prototype.buildContext = function(file, locals, options) {
   var opts = utils.assign({}, this.options, options);
   var fileData = utils.assign({}, file.data, file.data.permalink);
   var context = utils.assign({}, this.parse(file), this.data, locals, fileData);
@@ -222,16 +258,21 @@ Permalinks.prototype.context = function(file, locals, options) {
     }
   }
 
+  // add special properties to context
   ctx.app.format = this.format.bind(this);
   ctx.app.parse = this.parse.bind(this);
   ctx.context = data;
   ctx.file = file;
 
+  // bind the context to helpers
+  helpers = utils.deepBind(helpers, ctx);
+
+  // call user-defined context functions
   for (var i = 0; i < this.fns.length; i++) {
-    this.fns[i].call(this, ctx.context);
+    this.fns[i].call(this, ctx.file, ctx.context);
   }
 
-  helpers = utils.deepBind(helpers, ctx);
+  // call "file" helper
   if (typeof helpers.file === 'function') {
     helpers.file(file, data, locals);
     delete helpers.file;
@@ -256,10 +297,6 @@ Permalinks.prototype.context = function(file, locals, options) {
  */
 
 Permalinks.prototype.render = function(structure, options) {
-  if (!this.helpers.helperMissing) {
-    this.helper('helperMissing', helperMissing);
-  }
-
   var hbs = handlebars.create();
   hbs.registerHelper(options.helpers);
 
@@ -281,7 +318,7 @@ Permalinks.prototype.normalizeFile = function(file, options) {
 };
 
 /**
- * Default helper for managing missing variables
+ * Default helper for handling missing ":params"
  */
 
 function helperMissing() {

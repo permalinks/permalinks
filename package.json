@@ -23,6 +23,7 @@
   "dependencies": {
     "assign-deep": "^0.4.5",
     "deep-bind": "^0.3.0",
+    "diacritics-map": "^0.1.0",
     "get-value": "^2.0.6",
     "handlebars": "^4.0.6",
     "isobject": "^3.0.0",

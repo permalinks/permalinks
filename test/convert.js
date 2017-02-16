@@ -82,6 +82,11 @@ describe('convert syntax', function() {
     assert.equal(convert(':a(.)'), '{{a .}}');
   });
 
+  it('should convert helper expressions with hash arguments', function() {
+    assert.equal(convert(':a(., foo="bar")'), '{{a . foo="bar"}}');
+    assert.equal(convert(':a(foo="bar")'), '{{a foo="bar"}}');
+  });
+
   it('should convert helper expressions with slashes in arguments', function() {
     assert.equal(convert(':date(file, "YYYY/MM/DD")/:stem/index.html'), '{{date file "YYYY/MM/DD"}}/{{stem}}/index.html');
   });
