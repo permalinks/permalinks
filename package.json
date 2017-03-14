@@ -2,11 +2,11 @@
   "name": "permalinks",
   "description": "Easily add powerful permalink or URL routing/URL rewriting capablities to any node.js project. Can be used in static site generators, build systems, web applications or anywhere you need to do path or URL transformation.",
   "version": "1.2.0",
-  "homepage": "https://github.com/jonschlinkert/permalinks",
+  "homepage": "https://github.com/permalinks/permalinks",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
-  "repository": "jonschlinkert/permalinks",
+  "repository": "permalinks/permalinks",
   "bugs": {
-    "url": "https://github.com/jonschlinkert/permalinks/issues"
+    "url": "https://github.com/permalinks/permalinks/issues"
   },
   "license": "MIT",
   "files": [
