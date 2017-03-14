@@ -84,8 +84,13 @@ Permalinks.prototype.parse = function(file) {
   if (!utils.isObject(file)) {
     throw new TypeError('expected file to be an object');
   }
-  if (!file.path) return file;
+
+  if (!file.path || this.options.file === false) {
+    return file;
+  }
+
   var data = utils.parse(file.path);
+  // merge any other string values onto "data"
   for (var key in file) {
     if (file.hasOwnProperty(key) && typeof file[key] === 'string') {
       data[key] = file[key];
@@ -116,7 +121,7 @@ Permalinks.prototype.format = function(structure, file, locals) {
     file = structure;
     structure = null;
   }
-  file = this.normalizeFile(file, this.options);
+  file = this.normalizeFile(file);
   var context = this.buildContext(file, locals, this.options);
   var pattern = utils.get(file, 'data.permalink.structure') || this.preset(structure);
   return this.render(pattern, context);
@@ -234,8 +239,8 @@ Permalinks.prototype.context = function(fn) {
  * @return {Object}
  */
 
-Permalinks.prototype.buildContext = function(file, locals, options) {
-  var opts = utils.assign({}, this.options, options);
+Permalinks.prototype.buildContext = function(file, locals) {
+  var opts = utils.assign({}, this.options);
   var fileData = utils.assign({}, file.data, file.data.permalink);
   var context = utils.assign({}, this.parse(file), this.data, locals, fileData);
   var helpers = utils.assign({}, this.helpers);
@@ -291,13 +296,13 @@ Permalinks.prototype.buildContext = function(file, locals, options) {
  * @return {String} Returns the fully resolved permalink string.
  */
 
-Permalinks.prototype.render = function(structure, options) {
+Permalinks.prototype.render = function(structure, config) {
   var hbs = handlebars.create();
-  hbs.registerHelper(options.helpers);
+  hbs.registerHelper(config.helpers);
 
-  var str = convert(structure);
+  var str = convert(structure, config.options);
   var fn = hbs.compile(str);
-  return fn(options.data);
+  return fn(config.data);
 };
 
 /**
@@ -317,13 +322,16 @@ Permalinks.prototype.render = function(structure, options) {
  */
 
 Permalinks.prototype.normalizeFile = function(file, options) {
-  options = options || {};
+  var opts = Object.assign({}, this.options, options);
 
   if (typeof file === 'string') {
-    file = { path: file };
+    file = { path: file, created: true };
   }
 
-  return utils.normalizeFile(file, options);
+  if (opts.file === false) {
+    return file;
+  }
+  return utils.normalizeFile(file, opts);
 };
 
 /**

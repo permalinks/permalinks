@@ -13,6 +13,27 @@ describe('convert syntax', function() {
     assert.equal(convert(':foo/:bar'), '{{foo}}/{{bar}}');
   });
 
+  it('should convert variables followed by a slash', function() {
+    assert.equal(convert(':foo/'), '{{foo}}/');
+    assert.equal(convert(':foo/:bar/'), '{{foo}}/{{bar}}/');
+  });
+
+  it('should convert variables with a leading slash', function() {
+    assert.equal(convert('/:foo'), '/{{foo}}');
+    assert.equal(convert('/:foo/'), '/{{foo}}/');
+    assert.equal(convert('/:foo/:bar/'), '/{{foo}}/{{bar}}/');
+  });
+
+  it('should convert variables followed by a space', function() {
+    assert.equal(convert(':foo(bar (baz (a (b (c)))))/:abc/:xxx(bbb)'), '{{foo bar (baz (a (b (c))))}}/{{abc}}/{{xxx bbb}}');
+    assert.equal(convert(':foo(bar (baz (a (b (c)))))/:abc/:xxx(bbb) - :bar'), '{{foo bar (baz (a (b (c))))}}/{{abc}}/{{xxx bbb}} - {{bar}}');
+    assert.equal(convert(':foo '), '{{foo}} ');
+    assert.equal(convert(':foo :bar '), '{{foo}} {{bar}} ');
+    assert.equal(convert(':title - :num '), '{{title}} - {{num}} ');
+    assert.equal(convert(' - :upper(site.title) | page :num'), ' - {{upper site.title}} | page {{num}}');
+    assert.equal(convert(' - :upper(site.title)'), ' - {{upper site.title}}');
+  });
+
   it('should convert multiple variables in a segment', function() {
     assert.equal(convert(':foo:bar'), '{{foo}}{{bar}}');
     assert.equal(convert(':root/:a:b:c/foo.hbs'), '{{root}}/{{a}}{{b}}{{c}}/foo.hbs');
@@ -64,6 +85,22 @@ describe('convert syntax', function() {
     assert.equal(convert(':foo.bar/:baz.:qux'), '{{foo.bar}}/{{baz}}.{{qux}}');
     assert.equal(convert(':foo.bar/:b.az.:qux'), '{{foo.bar}}/{{b.az}}.{{qux}}');
     assert.equal(convert(':foo.bar/:b.:az.:qux'), '{{foo.bar}}/{{b}}.{{az}}.{{qux}}');
+  });
+
+  it('should disregard extensions when last character is a space', function() {
+    assert.equal(convert(':foo.bar/:baz.qux '), '{{foo.bar}}/{{baz.qux}} ');
+    assert.equal(convert(':foo.bar/:b.a.z.qux '), '{{foo.bar}}/{{b.a.z.qux}} ');
+    assert.equal(convert(':foo.bar/:baz.:qux '), '{{foo.bar}}/{{baz}}.{{qux}} ');
+    assert.equal(convert(' - :site.title '), ' - {{site.title}} ');
+    assert.equal(convert(' - :upper(site.title).hbs '), ' - {{upper site.title}}.hbs ');
+  });
+
+  it('should disregard extensions when first character is a space', function() {
+    assert.equal(convert(' :foo.bar/:baz.qux'),' {{foo.bar}}/{{baz.qux}}');
+    assert.equal(convert(' :foo.bar/:b.a.z.qux'),' {{foo.bar}}/{{b.a.z.qux}}');
+    assert.equal(convert(' :foo.bar/:baz.:qux'),' {{foo.bar}}/{{baz}}.{{qux}}');
+    assert.equal(convert(' - :site.title'),' - {{site.title}}');
+    assert.equal(convert(' - :upper(site.title).hbs'),' - {{upper site.title}}.hbs');
   });
 
   it('should convert empty helper expressions', function() {
