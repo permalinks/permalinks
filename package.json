@@ -1,6 +1,6 @@
 {
   "name": "permalinks",
-  "description": "Adds permalink or URL routing/URL rewriting logic to any node.js project. Can be used in static site generators, build systems, web applications or anywhere you need to do path transformation or prop-string replacements.",
+  "description": "Easily add powerful permalink or URL routing/URL rewriting capablities to any node.js project. Can be used in static site generators, build systems, web applications or anywhere you need to do path or URL transformation.",
   "version": "1.1.0",
   "homepage": "https://github.com/jonschlinkert/permalinks",
   "author": "Jon Schlinkert (https://github.com/jonschlinkert)",
@@ -29,7 +29,7 @@
     "isobject": "^3.0.0",
     "lazy-cache": "^2.0.2",
     "parse-filepath": "^1.0.1",
-    "use": "^2.0.0",
+    "use": "^2.0.2",
     "vinyl": "^2.0.1"
   },
   "devDependencies": {
@@ -68,14 +68,21 @@
     ],
     "related": {
       "list": [
-        "parse-filepath",
         "handlebars",
+        "parse-filepath",
         "vinyl"
       ]
     },
     "reflinks": [
       "parse-filepath",
-      "vinyl"
+      "vinyl",
+      "file",
+      "handlebars",
+      "handlebars-helpers",
+      "helpers",
+      "locals",
+      "structure",
+      "template-helpers"
     ],
     "lint": {
       "reflinks": true

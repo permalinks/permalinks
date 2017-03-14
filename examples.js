@@ -106,3 +106,11 @@ console.log(permalinks.normalizeFile({path: 'foo.hbs'}))
 
 console.log(permalinks.format(':name/index.html', 'src/about.hbs'));
 console.log(permalinks.format(':name/index.html', {name: 'foo'}));
+
+var permalinks = new Permalinks();
+permalinks.preset('pretty', 'blog/:slugify(name)/index.html');
+
+console.log(permalinks.format(':pretty', 'foo/bar/baz.hbs'));
+//=> 'blog/baz/index.html'
+console.log(permalinks.format(':pretty', 'foo/bar/qux.hbs'));
+//=> 'blog/qux/index.html'
