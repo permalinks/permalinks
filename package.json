@@ -74,15 +74,15 @@
       ]
     },
     "reflinks": [
-      "parse-filepath",
-      "vinyl",
       "file",
       "handlebars",
       "handlebars-helpers",
       "helpers",
       "locals",
+      "parse-filepath",
       "structure",
-      "template-helpers"
+      "template-helpers",
+      "vinyl"
     ],
     "lint": {
       "reflinks": true
