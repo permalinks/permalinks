@@ -23,10 +23,12 @@ const utils = require('./lib/utils');
  * Create an instance of `Permalinks` with the given `options`
  *
  * ```js
+ * const Permalinks = require('permalinks').Permalinks;
  * const permalinks = new Permalinks();
  * console.log(permalinks.format(':stem/index.html'), {path: 'src/about.hbs'});
  * //=> 'about/index.html'
  * ```
+ * @name Permalinks
  * @param {Options|String} `options`
  * @api public
  */
@@ -73,6 +75,7 @@ class Permalinks {
    * //   absolute: [Getter/Setter],
    * //   isAbsolute: [Getter/Setter] }
    * ```
+   * @name .parse
    * @param {Object} `file`
    * @return {Object}
    * @api public
@@ -105,6 +108,7 @@ class Permalinks {
    * console.log(fp);
    * //=> 'blog/about/index.html'
    * ```
+   * @name .format
    * @param {String} `structure` Permalink structure or the name of a registered [preset](#preset).
    * @param {Object|String} `file` File object or file path string.
    * @param {Object} `locals` Any additional data to use for resolving placeholders.
@@ -136,6 +140,7 @@ class Permalinks {
    * console.log(url);
    * //=> 'blog/about/index.html'
    * ```
+   * @name .preset
    * @param {String} `name` If only the name is passed,
    * @param {String} `structure`
    * @return {Object} Returns the `Permalinks` instance for chaining
@@ -179,7 +184,7 @@ class Permalinks {
    * console.log(file2);
    * //=> '2017/01/01/about/index.html'
    * ```
-   *
+   * @name .helper
    * @param {String} `name` Helper name
    * @param {Function} `fn`
    * @return {Object} Returns the Permalink instance for chaining.
@@ -205,7 +210,7 @@ class Permalinks {
    *   return this.file.data.title || this.context.site.title;
    * });
    * ```
-   *
+   * @name .context
    * @param {Function} `fn` Function that takes the `file` being rendered and the `context` as arguments. The permalinks instance is exposed as `this` inside the function.
    * @return {Object} Returns the instance for chaining.
    * @api public
@@ -229,6 +234,7 @@ class Permalinks {
    * ```js
    * permalinks.context(file, locals, options);
    * ```
+   * @name .buildContext
    * @param {Object} `file`
    * @param {Object} `locals`
    * @param {Object} `options`
@@ -290,6 +296,7 @@ class Permalinks {
    * Calls [handlebars][] to render the specified template `string` using
    * the given `options`.
    *
+   * @name .render
    * @param {String} `str`
    * @param {Object} `options`
    * @return {String} Returns the fully resolved permalink string.
@@ -313,7 +320,7 @@ class Permalinks {
    * console.log(file);
    * //=> '<File "foo.hbs">'
    * ```
-   *
+   * @name .normalizeFile
    * @param {String|Object} `file` If `file` is a string, it will be converted to the `file.path` on a file object.
    * @param {Object} `file`
    * @param {Object} `options`
