@@ -1,12 +1,16 @@
 'use strict';
 
 require('mocha');
-var assert = require('assert');
-var convert = require('../lib/convert');
+const assert = require('assert');
+const convert = require('../lib/convert');
 
 describe('convert syntax', function() {
   it('should convert a variable to handlebars', function() {
     assert.equal(convert(':foo'), '{{foo}}');
+  });
+
+  it('should convert when colon is in the middle of text', function() {
+    assert.equal(convert('a:foo'), 'a{{foo}}');
   });
 
   it('should convert path-separated variables to handlebars', function() {
@@ -48,7 +52,7 @@ describe('convert syntax', function() {
     assert.equal(convert(':&foo:bar'), ':&foo{{bar}}');
     assert.equal(convert('::foo:bar'), ':{{foo}}{{bar}}');
     assert.equal(convert(':$foo:bar'), '{{$foo}}{{bar}}');
-    assert.equal(convert(':-$foo:bar'), ':-$foo{{bar}}');
+    assert.equal(convert(':-$foo:bar'), '{{-$foo}}{{bar}}');
     assert.equal(convert(':$-foo:bar'), '{{$-foo}}{{bar}}');
     assert.equal(convert(':$$foo:bar'), '{{$$foo}}{{bar}}');
     assert.equal(convert(':f-o-o:bar'), '{{f-o-o}}{{bar}}');
@@ -65,14 +69,10 @@ describe('convert syntax', function() {
     assert.equal(convert('\\:foo:bar'), ':foo{{bar}}');
   });
 
-  it('should throw an error on when an invalid block is defined', function(cb) {
-    try {
+  it('should throw an error on when an invalid block is defined', function() {
+    assert.throws(function() {
       convert(':#if(bar):foo:^other:/zzz');
-      cb(new Error('expected an error'));
-    } catch (err) {
-      assert(/\{\{\/zzz\}\}/.test(err.message));
-      cb();
-    }
+    }, /does not match/);
   });
 
   it('should convert variables with dot-notation', function() {
@@ -88,19 +88,19 @@ describe('convert syntax', function() {
   });
 
   it('should disregard extensions when last character is a space', function() {
-    assert.equal(convert(':foo.bar/:baz.qux '), '{{foo.bar}}/{{baz.qux}} ');
-    assert.equal(convert(':foo.bar/:b.a.z.qux '), '{{foo.bar}}/{{b.a.z.qux}} ');
+    assert.equal(convert(':foo.bar/:baz.qux '), '{{foo.bar}}/{{baz}}.qux ');
+    assert.equal(convert(':foo.bar/:b.a.z.qux '), '{{foo.bar}}/{{b.a.z}}.qux ');
     assert.equal(convert(':foo.bar/:baz.:qux '), '{{foo.bar}}/{{baz}}.{{qux}} ');
     assert.equal(convert(' - :site.title '), ' - {{site.title}} ');
     assert.equal(convert(' - :upper(site.title).hbs '), ' - {{upper site.title}}.hbs ');
   });
 
   it('should disregard extensions when first character is a space', function() {
-    assert.equal(convert(' :foo.bar/:baz.qux'),' {{foo.bar}}/{{baz.qux}}');
-    assert.equal(convert(' :foo.bar/:b.a.z.qux'),' {{foo.bar}}/{{b.a.z.qux}}');
-    assert.equal(convert(' :foo.bar/:baz.:qux'),' {{foo.bar}}/{{baz}}.{{qux}}');
-    assert.equal(convert(' - :site.title'),' - {{site.title}}');
-    assert.equal(convert(' - :upper(site.title).hbs'),' - {{upper site.title}}.hbs');
+    assert.equal(convert(' :foo.bar/:baz.qux'), ' {{foo.bar}}/{{baz.qux}}');
+    assert.equal(convert(' :foo.bar/:b.a.z.qux'), ' {{foo.bar}}/{{b.a.z.qux}}');
+    assert.equal(convert(' :foo.bar/:baz.:qux'), ' {{foo.bar}}/{{baz}}.{{qux}}');
+    assert.equal(convert(' - :site.title'), ' - {{site.title}}');
+    assert.equal(convert(' - :upper(site.title).hbs'), ' - {{upper site.title}}.hbs');
   });
 
   it('should convert empty helper expressions', function() {

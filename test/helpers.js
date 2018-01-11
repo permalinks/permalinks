@@ -1,28 +1,28 @@
 'use strict';
 
-var File = require('vinyl');
-var assert = require('assert');
-var moment = require('moment');
-var random = require('randomatic');
-var Permalinks = require('..');
+const File = require('vinyl');
+const assert = require('assert');
+const moment = require('moment');
+const random = require('randomatic');
+const Permalinks = require('..');
 
 describe('helpers', function() {
   it('should use helpers to replace :params', function() {
-    var file = new File({path: 'foo/bar/baz.hbs'});
-    var permalinks = new Permalinks();
+    const file = new File({path: 'foo/bar/baz.hbs'});
+    const permalinks = new Permalinks();
 
     permalinks.helper('zzz', function() {
       return this.file.stem;
     });
 
-    var fixture = permalinks.format(':zzz/index.html', file);
+    const fixture = permalinks.format(':zzz/index.html', file);
     assert.equal(fixture, 'baz/index.html');
   });
 
   it('should call the "file" helper on every pattern', function() {
-    var file = new File({path: 'foo/bar/baz.hbs'});
-    var permalinks = new Permalinks();
-    var count = 0;
+    const file = new File({path: 'foo/bar/baz.hbs'});
+    const permalinks = new Permalinks();
+    let count = 0;
 
     permalinks.helper('file', function(file, data, locals) {
       data.num = ++count;
@@ -35,20 +35,20 @@ describe('helpers', function() {
   });
 
   it('should use helpers with arguments to replace :params', function() {
-    var file = new File({path: 'foo/bar/baz.hbs'});
-    var permalinks = new Permalinks();
+    const file = new File({path: 'foo/bar/baz.hbs'});
+    const permalinks = new Permalinks();
 
     permalinks.helper('zzz', function(val) {
       return val;
     });
 
-    var fixture = permalinks.format(':zzz(aaa)/index.html', file, {aaa: 'bbb'});
+    const fixture = permalinks.format(':zzz(aaa)/index.html', file, {aaa: 'bbb'});
     assert.equal(fixture, 'bbb/index.html');
   });
 
   it('should use helpers with subexpressions to replace :params', function() {
-    var file = new File({path: 'foo/bar/baz.hbs'});
-    var permalinks = new Permalinks();
+    const file = new File({path: 'foo/bar/baz.hbs'});
+    const permalinks = new Permalinks();
 
     permalinks.helper('zzz', function(val) {
       return val;
@@ -58,15 +58,15 @@ describe('helpers', function() {
       return val.toUpperCase();
     });
 
-    var locals = {aaa: 'bbb'};
-    var structure = ':upper((zzz aaa))/index.html';
-    var fixture = permalinks.format(structure, file, locals);
+    const locals = {aaa: 'bbb'};
+    const structure = ':upper((zzz aaa))/index.html';
+    const fixture = permalinks.format(structure, file, locals);
     assert.equal(fixture, 'BBB/index.html');
   });
 
   it('should use helpers with nested subexpressions', function() {
-    var file = new File({path: 'foo/bar/baz.hbs'});
-    var permalinks = new Permalinks();
+    const file = new File({path: 'foo/bar/baz.hbs'});
+    const permalinks = new Permalinks();
 
     permalinks.helper('zzz', function(val) {
       return val;
@@ -80,27 +80,27 @@ describe('helpers', function() {
       return val.split('').join('-');
     });
 
-    var locals = {aaa: 'bbb'};
-    var structure = ':upper((zzz (dashify aaa)))/index.html';
-    var fixture = permalinks.format(structure, file, locals);
+    const locals = {aaa: 'bbb'};
+    const structure = ':upper((zzz (dashify aaa)))/index.html';
+    const fixture = permalinks.format(structure, file, locals);
     assert.equal(fixture, 'B-B-B/index.html');
   });
 
   it('should support helpers with comma-separated arguments', function() {
-    var permalinks = new Permalinks();
+    const permalinks = new Permalinks();
 
     permalinks.helper('random', function(val) {
       return random.apply(null, val.split(','));
     });
 
-    var file = {basename: 'favicon', section: 'images', ext: '.png'};
-    var actual = permalinks.format(':section/:random("0Aa,9")-:basename:ext', file);
+    const file = {basename: 'favicon', section: 'images', ext: '.png'};
+    const actual = permalinks.format(':section/:random("0Aa,9")-:basename:ext', file);
     assert.equal(actual.length, 28);
   });
 
   it('should call helperMissing when variables are not resolved', function() {
-    var file = {basename: 'foo', ext: '.md'};
-    var permalinks = new Permalinks();
+    const file = {basename: 'foo', ext: '.md'};
+    const permalinks = new Permalinks();
 
     permalinks.helper('helperMissing', function(options) {
       switch (options.name) {
@@ -114,8 +114,8 @@ describe('helpers', function() {
       }
     });
 
-    var expected = moment(new Date()).format('YYYY/MM/DD') + '/foo/index.md';
-    var actual = permalinks.format(':YYYY/:MM/:DD/:basename/index:ext', file);
+    const expected = moment(new Date()).format('YYYY/MM/DD') + '/foo/index.md';
+    const actual = permalinks.format(':YYYY/:MM/:DD/:basename/index:ext', file);
     assert.equal(actual, expected);
   });
 });
